@@ -11,6 +11,17 @@ Organizations today face a massive challenge: extracting meaningful insights fro
 
 This hackathon is your opportunity to explore these technologies and create impactful solutions for real-world problems. 🌍
 
+## Key Technologies
+
+* **Docling**: An open-source tool for advanced document parsing and conversion.
+  * Supports formats like PDFs, DOCX, PPTX, and HTML 📑.
+  * Integrates with tools like LlamaIndex and LangChain for RAG tasks 🦙.
+  * Preserves context in complex layouts (e.g., multi-column text or tables spanning pages) 📊.
+* **Red Hat OpenShift AI**: A hybrid cloud platform optimized for deploying generative AI workloads 🌐.
+    * Helps you in all levels of MLops: develop, train, productize, and serve ⚡.
+    * Combines IBM’s Granite LLMs with Red Hat’s InstructLab tools 🛠️.
+    * Enables fine-tuning and deployment of custom models across cloud environments 🚉.
+
 
 ## Who Should Participate?
 
@@ -21,6 +32,6 @@ This hackathon is open to developers, data scientists, AI enthusiasts 🤓, and 
 1. Familiarize yourself with Docling by exploring its documentation 📘.
 2. Learn about deploying AI workloads on Red Hat OpenShift AI ⚙️.
 3. Brainstorm innovative use cases for document processing pipelines 💭.
-4. 
+
 Let’s redefine how organizations process their data—one pipeline at a time! 🚀
 
