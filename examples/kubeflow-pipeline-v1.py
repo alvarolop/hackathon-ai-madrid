@@ -48,3 +48,8 @@ def flipcoin_pipeline():
             print_op('A low value!')
     with dsl.Condition(flip.output == 'tails', 'tails-result'):
         print_op('Tails result')
+
+if __name__ == "__main__":
+    from kfp_tekton.compiler import TektonCompiler
+    compiler = TektonCompiler()
+    TektonCompiler().compile(flipcoin_pipeline, "output.yaml")
