@@ -57,11 +57,10 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url http://pypi.org/simple\
-          \ --trusted-host http://pypi.org/simple 'kfp==2.11.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
-          \ --index-url http://pypi.org/simple --trusted-host http://pypi.org/simple\
-          \ 'pymilvus' 'docling' 'pymilvus[model]' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pymilvus' 'docling'\
+          \ 'pymilvus[model]' && \"$0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -73,8 +72,8 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef create_vectors(document: dict, metadata: dict) -> typing.List:\n\
-          \    from docling.chunking import HybridChunker\n    chunker = HybridChunker(tokenizer=\"\
+          \ *\n\ndef create_vectors(document: dict, metadata: dict) -> list:\n   \
+          \ from docling.chunking import HybridChunker\n    chunker = HybridChunker(tokenizer=\"\
           BAAI/bge-small-en-v1.5\")\n    embedding_fn = model.DefaultEmbeddingFunction()\n\
           \    chunk_iter = chunker.chunk(document)\n    ## Create chunk_list with\
           \ the parts of the document\n    chunk_list = list(chunk_iter)\n    chunk_vectors\
@@ -102,11 +101,10 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url http://pypi.org/simple\
-          \ --trusted-host http://pypi.org/simple 'kfp==2.11.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
-          \ --index-url http://pypi.org/simple --trusted-host http://pypi.org/simple\
-          \ 'urlparse' 'docling' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'docling' &&\
+          \ \"$0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -118,7 +116,8 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef download_pdf(document_url: str) -> typing.Dict:\n    from docling.document_converter\
+          \ *\n\ndef download_pdf(document_url: str) -> dict:\n    import os\n   \
+          \ os.environ[\"EASYOCR_MODEL_PATH\"] = \"/tmp/EasyOCR\"\n    from docling.document_converter\
           \ import DocumentConverter\n    converter = DocumentConverter()\n    converted_source_file\
           \ = converter.convert(document_url)\n    return converted_source_file.document.export_to_dict\n\
           \n"
@@ -149,9 +148,13 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef get_document_metadata(document_url: str) -> typing.Dict:\n  \
-          \  return get_metadata_from_filename(get_file_name_from_url(document_url))\n\
-          \n"
+          \ *\n\ndef get_document_metadata(document_url: str) -> dict:\n    from urllib.parse\
+          \ import urlparse\n    # Parse the URL to extract the path\n    parsed_url\
+          \ = urlparse(document_url)\n    # Extract the file name from the path\n\
+          \    file_name = parsed_url.path.split('/')[-1]\n\n    metadata = file_name.split(\"\
+          -\")\n    return {\n        \"product_name\": metadata[0],\n        \"version\"\
+          : metadata[2],\n        \"section\": metadata[3],\n        \"language\"\
+          : metadata[4]\n    }\n\n"
         image: python:3.9
     exec-persist-vectors-on-milvus:
       container:
@@ -165,11 +168,10 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url http://pypi.org/simple\
-          \ --trusted-host http://pypi.org/simple 'kfp==2.11.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
-          \ --index-url http://pypi.org/simple --trusted-host http://pypi.org/simple\
-          \ 'pymilvus' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pymilvus' &&\
+          \ \"$0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -182,10 +184,16 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef persist_vectors_on_milvus(vectors: list, collection_name: str):\n\
-          \    milvus_client = create_milvus_client(\"http://vectordb-milvus.milvus.svc.cluster.local:19530\"\
-          , \"root\", \"Milvus\")\n    create_milvus_collection(milvus_client)\n \
-          \   return milvus_client.insert(collection_name=collection_name, data=vectors)\n\
-          \n"
+          \    from pymilvus import MilvusClient\n    milvus_client = MilvusClient(\"\
+          http://vectordb-milvus.milvus.svc.cluster.local:19530\", user=\"root\",\
+          \ password=\"Milvus\")\n\n    # Delete collection if the collection exists\n\
+          \    if milvus_client.has_collection(collection_name=collection_name):\n\
+          \        print(\"going to delete \", collection_name)\n        milvus_client.drop_collection(collection_name=collection_name)\n\
+          \    # Create collection\n    print(\"Creating Collection \", collection_name)\n\
+          \    milvus_client.create_collection(\n        collection_name=collection_name,\n\
+          \        dimension=768,  # The vectors we will use in this demo has 768\
+          \ dimensions\n    )\n    milvus_client.insert(collection_name=collection_name,\
+          \ data=vectors)\n\n"
         image: python:3.9
 pipelineInfo:
   name: download-persist-pdf-to-milvus-pipeline
